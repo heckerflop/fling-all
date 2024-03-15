@@ -1,0 +1,41 @@
+-- List of objects to fling
+local objects = {}
+for _, part in pairs(game.Workspace:GetChildren()) do
+    if part:IsA("BasePart") then
+        table.insert(objects, part)
+    end
+end
+
+-- Central point around which objects will be flung
+local centerPoint = game.Workspace.ExampleObject -- Replace with your central object
+local centerX, centerY, centerZ = centerPoint.Position.X, centerPoint.Position.Y, centerPoint.Position.Z
+
+-- Force applied to each object
+local force = 50
+
+function flingObjects()
+    for _, object in pairs(objects) do
+        -- Calculate the direction vector from the object to the center
+        local directionX = object.Position.X - centerX
+        local directionY = object.Position.Y - centerY
+        local directionZ = object.Position.Z - centerZ
+
+        -- Calculate the magnitude of the direction vector
+        local directionMagnitude = math.sqrt(directionX * directionX + directionY * directionY + directionZ * directionZ)
+
+        -- Normalize the direction vector
+        local normalizedDirectionX = directionX / directionMagnitude
+        local normalizedDirectionY = directionY / directionMagnitude
+        local normalizedDirectionZ = directionZ / directionMagnitude
+
+        -- Apply force to the object
+        object.Velocity = Vector3.new(force * normalizedDirectionX, force * normalizedDirectionY, force * normalizedDirectionZ)
+    end
+end
+
+-- Main loop
+while true do
+    flingObjects()
+    -- Adjust frame rate as needed
+    os.sleep(1)
+end
