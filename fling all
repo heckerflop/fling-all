@@ -1,41 +1,45 @@
--- List of objects to fling
-local objects = {}
-for _, part in pairs(game.Workspace:GetChildren()) do
-    if part:IsA("BasePart") then
-        table.insert(objects, part)
+-- Player to control
+local player = game.Players.LocalPlayer
+
+-- Player's character part (replace with the appropriate part in your game)
+local characterPart = player.Character:FindFirstChild("UpperTorso") or player.Character:FindFirstChild("PrimaryPart")
+
+-- Gravity multiplier (0 = no gravity, 1 = normal gravity)
+local gravityMultiplier = 0
+
+-- Flight speed
+local flightSpeed = 50
+
+-- Flag to control flight state
+local flying = false
+
+-- Key binding for flying
+local keyBinding = Enum.KeyCode.LeftShift
+
+-- Function to update the player's position
+local function updatePlayerPosition()
+    if flying then
+        -- Calculate the new position based on the flight speed
+        local newPosition = characterPart.Position + (characterPart.LookVector * flightSpeed * script.Parent.Parent.GameSettings.FlightSpeedMultiplier.Value)
+
+        -- Apply the new position to the character part
+        characterPart.CFrame = CFrame.new(newPosition, newPosition + Vector3.new(0, 1, 0))
     end
 end
 
--- Central point around which objects will be flung
-local centerPoint = game.Workspace.ExampleObject -- Replace with your central object
-local centerX, centerY, centerZ = centerPoint.Position.X, centerPoint.Position.Y, centerPoint.Position.Z
-
--- Force applied to each object
-local force = 50
-
-function flingObjects()
-    for _, object in pairs(objects) do
-        -- Calculate the direction vector from the object to the center
-        local directionX = object.Position.X - centerX
-        local directionY = object.Position.Y - centerY
-        local directionZ = object.Position.Z - centerZ
-
-        -- Calculate the magnitude of the direction vector
-        local directionMagnitude = math.sqrt(directionX * directionX + directionY * directionY + directionZ * directionZ)
-
-        -- Normalize the direction vector
-        local normalizedDirectionX = directionX / directionMagnitude
-        local normalizedDirectionY = directionY / directionMagnitude
-        local normalizedDirectionZ = directionZ / directionMagnitude
-
-        -- Apply force to the object
-        object.Velocity = Vector3.new(force * normalizedDirectionX, force * normalizedDirectionY, force * normalizedDirectionZ)
+-- Key press event
+game:GetService("UserInputService").InputEnded:Connect(function(input, gameProcess)
+    if input.KeyCode == keyBinding and gameProcess then
+        flying = not flying
     end
-end
+end)
 
--- Main loop
-while true do
-    flingObjects()
-    -- Adjust frame rate as needed
-    os.sleep(1)
+-- Update the player's position in the main loop
+while waiting() do
+    updatePlayerPosition()
+
+    -- Apply the gravity multiplier to the character's velocity
+    if characterPart then
+        characterPart.Velocity = characterPart.Velocity * Vector3.new(gravityMultiplier, -1, gravityMultiplier)
+    end
 end
